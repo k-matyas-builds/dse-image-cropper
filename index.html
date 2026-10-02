@@ -293,6 +293,35 @@ button:disabled{cursor:default}
 .tb-btn:disabled{opacity:.35}
 .tb-btn[aria-pressed="true"]{background:var(--accent-soft);box-shadow:var(--accent-ring)}
 
+/* Text preview: split button with an options popover */
+.tb-split{position:relative;display:inline-flex;align-items:center;border-radius:999px;transition:background .15s,box-shadow .15s}
+.tb-split.on{background:var(--accent-soft);box-shadow:var(--accent-ring)}
+.tb-split .tb-btn[aria-pressed="true"]{background:none;box-shadow:none}
+.tb-split.on #textToggle{padding-right:8px;border-radius:999px 0 0 999px}
+.tb-split .tb-chev{position:relative;min-width:30px;width:30px;padding:0 2px 0 0;border-radius:0 999px 999px 0}
+.tb-split .tb-chev::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:1px;background:currentColor;opacity:.22}
+.tb-chev svg{transition:transform .2s var(--ease)}
+.tb-chev[aria-expanded="true"] svg{transform:rotate(180deg)}
+.tb-pop{position:absolute;right:-7px;bottom:calc(100% + 14px);z-index:6;width:330px;padding:14px;border-radius:20px;text-align:left;
+  transform-origin:bottom right;animation:popIn .22s var(--ease)}
+@keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.pop-title{margin:0;font:600 13.5px var(--font);color:var(--ink)}
+.pop-cta{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.seg button:disabled{opacity:.35;cursor:default}
+.pop-row + .pop-row{margin-top:14px}
+.pop-label{display:block;margin-bottom:6px;font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.seg.seg-fill{display:flex;width:100%}
+.seg.seg-fill button{flex:1;min-width:0;padding:0 6px;white-space:nowrap}
+.pop-note{margin:0;font-size:12.5px;color:var(--ink-2)}
+.switch{position:relative;display:inline-flex;flex:none;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .track{position:relative;width:38px;height:22px;border-radius:11px;background:var(--track);transition:background .2s}
+.switch .track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .25s var(--ease)}
+.switch input:checked + .track{background:var(--accent)}
+.switch input:checked + .track::after{transform:translateX(16px)}
+.switch input:focus-visible + .track{outline:2px solid var(--accent-2);outline-offset:2px}
+
 input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:0;background:transparent;--pct:0%}
 input[type="range"]::-webkit-slider-runnable-track{height:4px;border-radius:2px;
   background:linear-gradient(90deg,var(--range-fill,var(--accent-2)) var(--pct),var(--track) var(--pct))}
@@ -451,6 +480,30 @@ input[type="range"]:disabled{opacity:.5}
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.75 8a5.25 5.25 0 1 0 1.6-3.78"/><path d="M2.5 2.25v3.25h3.25"/></svg>
         <span class="tb-text">Reset</span>
       </button>
+      <span class="tb-sep" id="textSep" aria-hidden="true" hidden></span>
+      <div class="tb-split" id="textCtl" hidden>
+        <button class="tb-btn" id="textToggle" type="button" aria-pressed="false" title="Preview where the component's text sits">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 3.5h10M8 3.5v9.5"/></svg>
+          <span class="tb-text">Text</span>
+        </button>
+        <button class="tb-btn tb-chev" id="textMenuBtn" type="button" aria-expanded="false" aria-controls="textPop" aria-label="Text preview options" title="Text preview options">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5L6 4.5l3 3"/></svg>
+        </button>
+        <div class="tb-pop glass" id="textPop" role="dialog" aria-label="Text preview options" hidden>
+          <div class="pop-head">
+            <p class="pop-title">Text preview</p>
+            <label class="pop-cta">CTA<span class="switch"><input type="checkbox" id="textCta" checked aria-label="Call to action"><span class="track"></span></span></label>
+          </div>
+          <div class="pop-row">
+            <span class="pop-label">Placement</span>
+            <div class="seg seg-fill" role="group" aria-label="Placement">
+              <button type="button" data-place="top-left" aria-pressed="false">Top left</button>
+              <button type="button" data-place="bottom-left" aria-pressed="false">Bottom left</button>
+              <button type="button" data-place="centre-bottom" aria-pressed="false">Bottom centre</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="drop-veil" aria-hidden="true">Drop to open</div>
@@ -549,11 +602,11 @@ const MAX_ZOOM = 8;           // relative to the smallest zoom that fills the fr
 const QUALITY_SETTLE_MS = 500; // wait after the quality slider stops before re-encoding
 
 const COMPONENTS = [
-  { id:'hero', code:'bbds', name:'Hero banner', groups:[
+  { id:'hero', code:'bbds', text:'billboard', name:'Hero banner', groups:[
     { label:'', items:[
       { name:'Desktop', ratio:'16:9', w:1920, h:1080 },
       { name:'Mobile',  ratio:'9:16', w:780,  h:1385 } ]} ]},
-  { id:'banner', code:'bbds', name:'Banner', groups:[
+  { id:'banner', code:'bbds', text:'banner', name:'Banner', groups:[
     { label:'Desktop', items:[
       { name:'Default', ratio:'16:9', w:1920, h:1080 },
       { name:'Short',   ratio:'16:7', w:1920, h:840 },
@@ -562,7 +615,7 @@ const COMPONENTS = [
       { name:'Default', ratio:'9:16', w:780,  h:1385 },
       { name:'Short',   ratio:'3:4',  w:780,  h:1040 },
       { name:'Square',  ratio:'1:1',  w:1000, h:1000 } ]} ]},
-  { id:'large', code:'lcds', name:'Large card', groups:[
+  { id:'large', code:'lcds', text:'large', name:'Large card', groups:[
     { label:'Desktop', items:[
       { name:'Default', ratio:'16:9', w:1920, h:1080 },
       { name:'Short',   ratio:'16:7', w:1920, h:840 } ]},
@@ -588,10 +641,41 @@ const COMPONENTS = [
 const PRESETS = {};
 for (const c of COMPONENTS) (c.groups || []).forEach((g, gi) => g.items.forEach((it, i) => {
   it.id = `${c.id}-${gi}-${i}`;
-  it.comp = c.id; it.code = c.code;
+  it.comp = c.id; it.code = c.code; it.text = c.text;
+  it.screen = g.label === 'Mobile' || it.name === 'Mobile' ? 'mobile' : 'desktop';
   it.label = `${c.name}, ${[g.label, it.name].filter(Boolean).join(' ').toLowerCase()}`;
   PRESETS[it.id] = it;
 }));
+
+/* ---------- Text preview data ----------
+   d is the desktop layout, m the mobile one, in pixels of the layout width wc.
+   Banner is fitted to the production preview templates (1920 x 840 and 780 x 1040, in image pixels).
+   Billboard and Large card are measured from the live page at 1920 px and on a 390 px phone, in CSS px.
+   pad: margins [top, right, bottom with CTA, left]; padBn: bottom margin without CTA; col: text column width.
+   h and b: headline and body type (fs size, lh line height, fw weight, ls letter spacing,
+   x extra box height, bl first baseline from the top of its box).
+   cta: button w (0 sizes it to the label within minW..maxW), h, gap above, tail below, and label type. */
+const TEXT_SPECS = {"billboard":{"cta":"primary","w":{"d":{"wc":1910,"pad":[64,247,64,247],"padBn":64,"col":936,"h":{"fs":46,"lh":56,"fw":600,"ls":-0.48,"x":8,"bl":43.9},"b":{"fs":16,"lh":24,"fw":600,"ls":0.19,"x":8,"bl":17.0},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":380,"pad":[24,24,24,24],"padBn":24,"col":332,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.48,"x":8,"bl":31.1},"b":{"fs":14,"lh":24,"fw":600,"ls":0.16,"x":8,"bl":16.9},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"large":{"cta":"secondary","w":{"d":{"wc":1416,"pad":[64,64,64,64],"padBn":64,"col":936,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":21,"bl":44.1},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":17.0},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":332,"pad":[24,24,24,24],"padBn":24,"col":284,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":23.8},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":16.9},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"banner":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":1416,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":676,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}}}};
+// Stand-in copy and line breaks, as in the production preview templates.
+const TEXT_COPY = {
+  d:{ head:['Lorem ipsum dolor sit amet'],
+      body:['Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor', 'incididunt ut labore et dolore magna aliqua.'] },
+  m:{ head:['Lorem ipsum dolor', 'sit amet'],
+      body:['Lorem ipsum dolor sit amet, consectetur', 'adipiscing elit Proin porttitor sapien dolor,', 'nec rutrum'] },
+  cta:'Label'
+};
+const TEXT_FONT = '"Ford Antenna", FordAntenna, "Ford-Antenna", "Helvetica Neue", Helvetica, Arial, sans-serif';
+// Ford Antenna is wider than the fallback fonts. These text widths come from a live page and the production
+// templates, and set how much the fallback is stretched, separately for bold and regular text.
+const ANTENNA_REF = [
+  { text:'Ready for the road ahead', fs:58, fw:600, ls:-0.72, w:722.5 },
+  { text:'Ford Service', fs:46, fw:600, ls:-0.58, w:281.5 },
+  { text:'Expert care you can count on', fs:16, fw:600, ls:0.19, w:238.5 },
+  { text:'Lorem ipsum dolor sit amet', fs:48, fw:600, ls:-0.6, w:653 },
+  { text:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor', fs:20, fw:400, ls:0.24, w:798 },
+  { text:'Lorem ipsum dolor sit amet, consectetur', fs:32, fw:400, ls:0.38, w:647 },
+  { text:'adipiscing elit  Proin porttitor sapien dolor,', fs:32, fw:400, ls:0.38, w:676 }
+];
 
 /* ---------- Elements & state ---------- */
 const $ = id => document.getElementById(id);
@@ -607,6 +691,7 @@ const els = {
   qualityBox:$('qualityBox'), quality:$('quality'), qualityVal:$('qualityVal'), qTick:$('qTick'), qFit:$('qFit'),
   stWeight:$('stWeight'), stWeightVal:$('stWeightVal'), stWeightMsg:$('stWeightMsg'), stQuality:$('stQuality'), stQualityMsg:$('stQualityMsg'), downloadBtn:$('downloadBtn'),
   toast:$('toast'), toastText:$('toastText'), toastClose:$('toastClose'),
+  textSep:$('textSep'), textCtl:$('textCtl'), textToggle:$('textToggle'), textMenuBtn:$('textMenuBtn'), textPop:$('textPop'), textCta:$('textCta'),
   cw:null, ch:null, customErr:null
 };
 const ctx = els.canvas.getContext('2d');
@@ -625,6 +710,7 @@ const S = {
   auto:null,          // { blob, q, fits }: highest quality that fits the DSE limit
   manualQ:null,       // quality picked on the review slider, or null for the automatic fit
   result:null, stale:false, gen:0, compressTimer:0, hinted:false,
+  text:{ on:false, cta:true, seenPop:false, place:{ billboard:'centre-bottom', banner:'bottom-left', large:'bottom-left' } },
   reviewOpen:false, rvMode:'fit'
 };
 const view = { W:0, H:0, dpr:1, p:0 };  // p: how far the panel has slid in, 0 to 1
@@ -773,6 +859,7 @@ function draw(now){
     ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(F.x, F.y, F.w, F.h); ctx.fill('evenodd');
 
     ctx.globalAlpha = g.dim;
+    drawTextPreview(F, g.dim);
     if (S.grid || S.interacting) {
       ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1; ctx.beginPath();
       for (let i = 1; i < 3; i++) {
@@ -989,7 +1076,7 @@ function applyCustom(fromEnter){
 }
 
 function onTargetChange(){
-  syncComps(); syncEnabled(); updateCropInfo(); updatePrompt(); requestDraw();
+  syncComps(); syncEnabled(); syncTextUI(); updateCropInfo(); updatePrompt(); requestDraw();
   resetResult();
 }
 
@@ -1102,6 +1189,142 @@ function resetFraming(){
   changed();
 }
 els.resetBtn.addEventListener('click', resetFraming);
+
+/* ---------- Text preview ---------- */
+function textLayout(){
+  const t = target();
+  if (!S.text.on || !S.img || !t || !t.text) return null;
+  return { t, sp:TEXT_SPECS[t.text].w[t.screen === 'mobile' ? 'm' : 'd'], cta:TEXT_SPECS[t.text].cta, place:textPlace(t) };
+}
+// On mobile the live page puts bottom-centre text bottom left, so the preview does too.
+function textPlace(t){
+  const place = S.text.place[t.text];
+  return t.screen === 'mobile' && place === 'centre-bottom' ? 'bottom-left' : place;
+}
+// 1 if Ford Antenna is installed, otherwise how much wider Antenna is than the fallback font at this weight.
+const fontStretch = {};
+function textStretch(fw){
+  const bold = fw >= 600, key = bold ? 'bold' : 'regular';
+  if (fontStretch[key] != null) return fontStretch[key];
+  ctx.save();
+  ctx.font = '40px monospace'; const mono = ctx.measureText('Your new Ford').width;
+  ctx.font = `40px ${TEXT_FONT.split(', "Helvetica Neue"')[0]}, monospace`; const antenna = ctx.measureText('Your new Ford').width;
+  let k = 1;
+  if (antenna === mono) {                      // no Antenna on this machine
+    const refs = ANTENNA_REF.filter(r => (r.fw >= 600) === bold);
+    k = refs.reduce((sum, r) => { setFont(r, r.fs); const m = ctx.measureText(r.text); return sum + r.w / (m.actualBoundingBoxLeft + m.actualBoundingBoxRight); }, 0) / refs.length;
+    k = clamp(k, .9, 1.3);
+  }
+  ctx.restore();
+  return fontStretch[key] = k;
+}
+function setFont(f, px){
+  ctx.font = `${f.fw} ${px}px ${TEXT_FONT}`;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${f.ls * px / f.fs}px`;
+}
+// The template line breaks are the reference, so a line only breaks further if it overshoots the column by 5%.
+function wrapLines(text, f, maxW, st){
+  setFont(f, f.fs);
+  const lines = []; let cur = '';
+  for (const word of text.split(' ')) {
+    const test = cur ? cur + ' ' + word : word;
+    if (cur && ctx.measureText(test).width * st > maxW * 1.05) { lines.push(cur); cur = word; } else cur = test;
+  }
+  if (cur) lines.push(cur);
+  return lines.map(line => ({ line, w:ctx.measureText(line).width * st }));
+}
+// Draws text stretched horizontally by st, anchored at x on the left or, for 'center', in the middle.
+function stretchedText(str, x, y, st, align){
+  ctx.save(); ctx.translate(x, y); ctx.scale(st, 1); ctx.textAlign = align; ctx.fillText(str, 0, 0); ctx.restore();
+}
+// Draws the component's gradient, headline, body and CTA inside the frame, laid out as on the live page.
+function drawTextPreview(F, alpha){
+  const L = textLayout(); if (!L) return;
+  const { t, sp } = L, c = sp.cta, k = F.w / sp.wc, Hc = sp.wc * t.h / t.w;
+  const copy = TEXT_COPY[t.screen === 'mobile' ? 'm' : 'd'];
+  const bottom = L.place !== 'top-left', centre = L.place === 'centre-bottom';
+  const X = v => F.x + v * k, Y = v => F.y + v * k;
+  const stH = textStretch(sp.h.fw), stB = textStretch(sp.b.fw), stC = textStretch(c.fw);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(F.x, F.y, F.w, F.h); ctx.clip();
+  ctx.globalAlpha = alpha;
+  // Keep the template's line breaks, and only break further if a line doesn't fit the column.
+  const head = copy.head.flatMap(l => wrapLines(l, sp.h, sp.col, stH));
+  const body = copy.body.flatMap(l => wrapLines(l, sp.b, sp.col, stB));
+  const headH = head.length * sp.h.lh + sp.h.x, bodyH = body.length * sp.b.lh + sp.b.x;
+  const wrapH = sp.pad[0] + headH + bodyH + (S.text.cta ? c.gap + c.h + c.tail + sp.pad[2] : sp.padBn);
+  const wy = bottom ? Hc - wrapH : 0;
+  const colX = centre ? (sp.wc - sp.col) / 2 : sp.pad[3];
+
+  const g = ctx.createLinearGradient(0, Y(wy), 0, Y(wy + wrapH));
+  if (bottom) { g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.83, 'rgba(0,0,0,.8)'); g.addColorStop(1, 'rgba(0,0,0,.8)'); }
+  else { g.addColorStop(0, 'rgba(0,0,0,.8)'); g.addColorStop(1, 'rgba(0,0,0,0)'); }
+  ctx.fillStyle = g; ctx.fillRect(F.x, Y(wy), F.w, wrapH * k);
+
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+  let y = wy + sp.pad[0];
+  const drawLines = (lines, f, st) => {
+    setFont(f, f.fs * k);
+    lines.forEach((l, i) => stretchedText(l.line, X(centre ? colX + (sp.col - l.w) / 2 : colX), Y(y + f.bl + i * f.lh), st, 'left'));
+    y += lines.length * f.lh + f.x;
+  };
+  drawLines(head, sp.h, stH);
+  drawLines(body, sp.b, stB);
+  if (S.text.cta) {
+    y += c.gap;
+    setFont(c, c.fs);
+    const bw = c.w || clamp(ctx.measureText(TEXT_COPY.cta).width * stC + c.padX * 2, c.minW, c.maxW);
+    const bx = centre ? colX + (sp.col - bw) / 2 : colX;
+    ctx.beginPath();
+    if (L.cta === 'primary') { ctx.roundRect(X(bx), Y(y), bw * k, c.h * k, c.h / 2 * k); ctx.fillStyle = '#1700F4'; ctx.fill(); }
+    else { ctx.roundRect(X(bx + 1), Y(y + 1), (bw - 2) * k, (c.h - 2) * k, c.h / 2 * k); ctx.lineWidth = 2 * k; ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
+    setFont(c, c.fs * k);
+    stretchedText(TEXT_COPY.cta, X(bx + bw / 2), Y(y + c.h / 2), stC, 'center');
+  }
+  ctx.restore();
+}
+
+function openTextPop(){ els.textPop.hidden = false; els.textMenuBtn.setAttribute('aria-expanded', 'true'); }
+function closeTextPop(){ els.textPop.hidden = true; els.textMenuBtn.setAttribute('aria-expanded', 'false'); }
+function syncTextUI(){
+  const t = target(), ok = !!(S.img && t && t.text);
+  els.textCtl.hidden = els.textSep.hidden = !ok;
+  if (!ok) closeTextPop();
+  els.textToggle.setAttribute('aria-pressed', String(ok && S.text.on));
+  els.textCtl.classList.toggle('on', ok && S.text.on);
+  els.textMenuBtn.hidden = !(ok && S.text.on);
+  if (!ok) return;
+  const place = textPlace(t), mobile = t.screen === 'mobile';
+  els.textPop.querySelectorAll('[data-place]').forEach(b => {
+    const centre = b.dataset.place === 'centre-bottom';
+    b.setAttribute('aria-pressed', String(b.dataset.place === place));
+    b.disabled = mobile && centre;
+    b.title = mobile && centre ? 'Mobile layouts show centred text bottom left' : '';
+  });
+  els.textCta.checked = S.text.cta;
+}
+function textChanged(){ syncTextUI(); updateCropInfo(); requestDraw(); }
+
+els.textToggle.addEventListener('click', () => {
+  S.text.on = !S.text.on;
+  if (S.text.on && !S.text.seenPop) { S.text.seenPop = true; openTextPop(); }   // show the options the first time
+  if (!S.text.on) closeTextPop();
+  textChanged();
+});
+els.textMenuBtn.addEventListener('click', () => {
+  if (els.textPop.hidden) openTextPop(); else closeTextPop();
+  textChanged();
+});
+els.textPop.querySelectorAll('[data-place]').forEach(b => b.addEventListener('click', () => {
+  const t = target(); if (!t || !t.text) return;
+  S.text.place[t.text] = b.dataset.place; textChanged();
+}));
+els.textCta.addEventListener('change', () => { S.text.cta = els.textCta.checked; textChanged(); });
+document.addEventListener('pointerdown', e => { if (!els.textPop.hidden && !els.textCtl.contains(e.target)) closeTextPop(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !els.textPop.hidden && !S.reviewOpen) { closeTextPop(); els.textMenuBtn.focus(); }
+});
 
 /* ---------- Output rendering & compression ---------- */
 function renderOutput(t){
@@ -1246,6 +1469,7 @@ els.qFit.addEventListener('click', () => { S.manualQ = null; clearTimeout(qTimer
 let rvReturn = null;
 function openReview(){
   const t = target(); if (!t || S.reviewOpen) return;
+  closeTextPop();
   S.reviewOpen = true; rvReturn = document.activeElement;
   els.review.hidden = false;
   els.rvTitle.textContent = t.label;
