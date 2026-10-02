@@ -550,8 +550,9 @@ const QUALITY_SETTLE_MS = 500; // wait after the quality slider stops before re-
 
 const COMPONENTS = [
   { id:'hero', code:'bbds', name:'Hero banner', groups:[
-    { label:'Desktop', items:[{ name:'Default', ratio:'16:9', w:1920, h:1080 }] },
-    { label:'Mobile',  items:[{ name:'Default', ratio:'9:16', w:780,  h:1385 }] } ]},
+    { label:'', items:[
+      { name:'Desktop', ratio:'16:9', w:1920, h:1080 },
+      { name:'Mobile',  ratio:'9:16', w:780,  h:1385 } ]} ]},
   { id:'banner', code:'bbds', name:'Banner', groups:[
     { label:'Desktop', items:[
       { name:'Default', ratio:'16:9', w:1920, h:1080 },
