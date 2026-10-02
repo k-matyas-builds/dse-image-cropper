@@ -459,7 +459,7 @@ input[type="range"]:disabled{opacity:.5}
       </button>
       <h1 class="w-title">Drag in an image</h1>
       <p class="w-action">or <button class="w-link" id="pickBtn" type="button">select from your computer</button></p>
-      <p class="w-note">JPG or PNG</p>
+      <p class="w-note">Accepted formats: JPG, PNG, WebP, AVIF</p>
     </section>
 
     <div class="toolbar glass" id="toolbar" role="toolbar" aria-label="Framing">
@@ -582,7 +582,7 @@ input[type="range"]:disabled{opacity:.5}
   <button class="btn" id="toastClose" type="button">Dismiss</button>
 </div>
 
-<input type="file" id="fileInput" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
+<input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/avif,.jpg,.jpeg,.jfif,.png,.webp,.avif" hidden>
 
 <script>
 (() => {
@@ -1643,17 +1643,25 @@ els.toastClose.addEventListener('click', hideToast);
 
 /* ---------- Loading ---------- */
 // Checks the file's first bytes, so a renamed or mislabelled file is caught too.
+// JFIF files are JPEGs, so they pass as jpg.
 async function sniff(blob){
-  const b = new Uint8Array(await blob.slice(0, 8).arrayBuffer());
+  const b = new Uint8Array(await blob.slice(0, 64).arrayBuffer());
+  const ascii = (i, n) => String.fromCharCode(...b.slice(i, i + n));
   if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return 'jpg';
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return 'png';
+  if (b[0] === 0x89 && ascii(1, 3) === 'PNG') return 'png';
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 4) === 'WEBP') return 'webp';
+  if (ascii(4, 4) === 'ftyp') {                         // AVIF: the brand list in the ftyp box names avif or avis
+    const size = Math.min(b.length, (b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]) >>> 0);
+    for (let i = 8; i + 4 <= size; i += 4) if (['avif', 'avis'].includes(ascii(i, 4))) return 'avif';
+  }
   return null;
 }
 
 async function loadBlob(blob, name){
   if (!blob) return false;
-  if (!(await sniff(blob))) {
-    toast(`\u201c${name || 'This file'}\u201d isn\u2019t a JPG or PNG. Export it as JPG or PNG and try again.`, 'error');
+  const type = await sniff(blob);
+  if (!type) {
+    toast(`\u201c${name || 'This file'}\u201d isn\u2019t a JPG, PNG, WebP or AVIF. Export it as one of those and try again.`, 'error');
     return false;
   }
   const url = URL.createObjectURL(blob);
@@ -1661,7 +1669,9 @@ async function loadBlob(blob, name){
   try { await img.decode(); if (!img.naturalWidth) throw new Error('empty'); }
   catch {
     URL.revokeObjectURL(url);
-    toast(`\u201c${name || 'This file'}\u201d couldn\u2019t be opened. The file may be damaged. Export it again and retry.`, 'error');
+    toast(type === 'avif'
+      ? `This browser can\u2019t open AVIF files. Update it, or save \u201c${name || 'the image'}\u201d as JPG or PNG.`
+      : `\u201c${name || 'This file'}\u201d couldn\u2019t be opened. The file may be damaged. Export it again and retry.`, 'error');
     return false;
   }
   hideToast();
