@@ -624,7 +624,7 @@ const COMPONENTS = [
       { name:'Short',      ratio:'3:4',  w:780,  h:1040 },
       { name:'Square',     ratio:'1:1',  w:1000, h:1000 },
       { name:'Widescreen', ratio:'16:9', w:1920, h:1080 } ]} ]},
-  { id:'feature', code:'fcds', name:'Feature card', groups:[
+  { id:'feature', code:'fcds', text:'feature', name:'Feature card', groups:[
     { label:'', items:[
       { name:'Desktop', ratio:'', w:1000, h:1147 },
       { name:'Mobile',  ratio:'', w:780,  h:1035 } ]} ]},
@@ -651,11 +651,14 @@ for (const c of COMPONENTS) (c.groups || []).forEach((g, gi) => g.items.forEach(
    d is the desktop layout, m the mobile one, in pixels of the layout width wc.
    Banner is fitted to the production preview templates (1920 x 840 and 780 x 1040, in image pixels).
    Billboard and Large card are measured from the live page at 1920 px and on a 390 px phone, in CSS px.
+   Feature card is a Large card in a carousel: measured at a 577 px card (about a 1550 px window) and on a phone.
+   Its placement and CTA are fixed, as on the live page. Baselines are corrected for Ford Antenna, which sits
+   about 0.11 em higher in its line than the fallback font the live layouts were measured with.
    pad: margins [top, right, bottom with CTA, left]; padBn: bottom margin without CTA; col: text column width.
    h and b: headline and body type (fs size, lh line height, fw weight, ls letter spacing,
    x extra box height, bl first baseline from the top of its box).
    cta: button w (0 sizes it to the label within minW..maxW), h, gap above, tail below, and label type. */
-const TEXT_SPECS = {"billboard":{"cta":"primary","w":{"d":{"wc":1910,"pad":[64,247,64,247],"padBn":64,"col":936,"h":{"fs":46,"lh":56,"fw":600,"ls":-0.48,"x":8,"bl":43.9},"b":{"fs":16,"lh":24,"fw":600,"ls":0.19,"x":8,"bl":17.0},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":380,"pad":[24,24,24,24],"padBn":24,"col":332,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.48,"x":8,"bl":31.1},"b":{"fs":14,"lh":24,"fw":600,"ls":0.16,"x":8,"bl":16.9},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"large":{"cta":"secondary","w":{"d":{"wc":1416,"pad":[64,64,64,64],"padBn":64,"col":936,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":21,"bl":44.1},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":17.0},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":332,"pad":[24,24,24,24],"padBn":24,"col":284,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":23.8},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":16.9},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"banner":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":1416,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":676,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}}}};
+const TEXT_SPECS = {"billboard":{"cta":"primary","w":{"d":{"wc":1910,"pad":[64,247,64,247],"padBn":64,"col":936,"h":{"fs":46,"lh":56,"fw":600,"ls":-0.48,"x":8,"bl":38.8},"b":{"fs":16,"lh":24,"fw":600,"ls":0.19,"x":8,"bl":15.2},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":380,"pad":[24,24,24,24],"padBn":24,"col":332,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.48,"x":8,"bl":27.6},"b":{"fs":14,"lh":24,"fw":600,"ls":0.16,"x":8,"bl":15.4},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"large":{"cta":"secondary","w":{"d":{"wc":1416,"pad":[64,64,64,64],"padBn":64,"col":936,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":21,"bl":40.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.2},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":332,"pad":[24,24,24,24],"padBn":24,"col":284,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.4},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"banner":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":1416,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":676,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}}},"feature":{"cta":"secondary","fixed":{"place":"bottom-left","cta":true},"w":{"d":{"wc":577,"pad":[64,64,64,64],"padBn":64,"col":449,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":8,"bl":27.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":342,"pad":[24,24,24,24],"padBn":24,"col":294,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}}};
 // Stand-in copy and line breaks, as in the production preview templates.
 const TEXT_COPY = {
   d:{ head:['Lorem ipsum dolor sit amet'],
@@ -710,7 +713,7 @@ const S = {
   auto:null,          // { blob, q, fits }: highest quality that fits the DSE limit
   manualQ:null,       // quality picked on the review slider, or null for the automatic fit
   result:null, stale:false, gen:0, compressTimer:0, hinted:false,
-  text:{ on:false, cta:true, seenPop:false, place:{ billboard:'centre-bottom', banner:'bottom-left', large:'bottom-left' } },
+  text:{ on:false, cta:true, seenPop:false, place:{ billboard:'centre-bottom', banner:'bottom-left', large:'bottom-left', feature:'bottom-left' } },
   reviewOpen:false, rvMode:'fit'
 };
 const view = { W:0, H:0, dpr:1, p:0 };  // p: how far the panel has slid in, 0 to 1
@@ -727,7 +730,7 @@ const X = '\u00d7';
 
 function sanitizeBase(name){
   return (name || '').replace(/\.[^.]+$/, '')
-    .replace(/[_-]\d+x\d+(?:[_-][a-z]{4})?$/i, '')   // drop a size tail from an earlier export
+    .replace(/[_-]\d+x\d+(?:[_-][a-z]{2,5})?$/i, '')   // drop a size tail from an earlier export
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'image';
 }
@@ -1194,7 +1197,9 @@ els.resetBtn.addEventListener('click', resetFraming);
 function textLayout(){
   const t = target();
   if (!S.text.on || !S.img || !t || !t.text) return null;
-  return { t, sp:TEXT_SPECS[t.text].w[t.screen === 'mobile' ? 'm' : 'd'], cta:TEXT_SPECS[t.text].cta, place:textPlace(t) };
+  const spec = TEXT_SPECS[t.text], fixed = spec.fixed;
+  return { t, sp:spec.w[t.screen === 'mobile' ? 'm' : 'd'], ctaStyle:spec.cta,
+    place:fixed ? fixed.place : textPlace(t), showCta:fixed ? fixed.cta : S.text.cta };
 }
 // On mobile the live page puts bottom-centre text bottom left, so the preview does too.
 function textPlace(t){
@@ -1252,7 +1257,7 @@ function drawTextPreview(F, alpha){
   const head = copy.head.flatMap(l => wrapLines(l, sp.h, sp.col, stH));
   const body = copy.body.flatMap(l => wrapLines(l, sp.b, sp.col, stB));
   const headH = head.length * sp.h.lh + sp.h.x, bodyH = body.length * sp.b.lh + sp.b.x;
-  const wrapH = sp.pad[0] + headH + bodyH + (S.text.cta ? c.gap + c.h + c.tail + sp.pad[2] : sp.padBn);
+  const wrapH = sp.pad[0] + headH + bodyH + (L.showCta ? c.gap + c.h + c.tail + sp.pad[2] : sp.padBn);
   const wy = bottom ? Hc - wrapH : 0;
   const colX = centre ? (sp.wc - sp.col) / 2 : sp.pad[3];
 
@@ -1270,13 +1275,13 @@ function drawTextPreview(F, alpha){
   };
   drawLines(head, sp.h, stH);
   drawLines(body, sp.b, stB);
-  if (S.text.cta) {
+  if (L.showCta) {
     y += c.gap;
     setFont(c, c.fs);
     const bw = c.w || clamp(ctx.measureText(TEXT_COPY.cta).width * stC + c.padX * 2, c.minW, c.maxW);
     const bx = centre ? colX + (sp.col - bw) / 2 : colX;
     ctx.beginPath();
-    if (L.cta === 'primary') { ctx.roundRect(X(bx), Y(y), bw * k, c.h * k, c.h / 2 * k); ctx.fillStyle = '#1700F4'; ctx.fill(); }
+    if (L.ctaStyle === 'primary') { ctx.roundRect(X(bx), Y(y), bw * k, c.h * k, c.h / 2 * k); ctx.fillStyle = '#1700F4'; ctx.fill(); }
     else { ctx.roundRect(X(bx + 1), Y(y + 1), (bw - 2) * k, (c.h - 2) * k, c.h / 2 * k); ctx.lineWidth = 2 * k; ctx.strokeStyle = '#fff'; ctx.stroke(); }
     ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
     setFont(c, c.fs * k);
@@ -1293,7 +1298,9 @@ function syncTextUI(){
   if (!ok) closeTextPop();
   els.textToggle.setAttribute('aria-pressed', String(ok && S.text.on));
   els.textCtl.classList.toggle('on', ok && S.text.on);
-  els.textMenuBtn.hidden = !(ok && S.text.on);
+  const fixed = ok && !!TEXT_SPECS[t.text].fixed;
+  els.textMenuBtn.hidden = !(ok && S.text.on) || fixed;
+  if (fixed) closeTextPop();
   if (!ok) return;
   const place = textPlace(t), mobile = t.screen === 'mobile';
   els.textPop.querySelectorAll('[data-place]').forEach(b => {
@@ -1308,7 +1315,8 @@ function textChanged(){ syncTextUI(); updateCropInfo(); requestDraw(); }
 
 els.textToggle.addEventListener('click', () => {
   S.text.on = !S.text.on;
-  if (S.text.on && !S.text.seenPop) { S.text.seenPop = true; openTextPop(); }   // show the options the first time
+  const t = target();
+  if (S.text.on && !S.text.seenPop && t && !TEXT_SPECS[t.text].fixed) { S.text.seenPop = true; openTextPop(); }   // show the options the first time
   if (!S.text.on) closeTextPop();
   textChanged();
 });
