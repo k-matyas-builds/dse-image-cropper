@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DSE image cropper</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%233B92FF'/><stop offset='1' stop-color='%23066FEF'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><path d='M11 6.5v14.5h14.5M6.5 11h14.5v14.5' fill='none' stroke='white' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 <script>
 try { var themePref = localStorage.getItem('dse-cropper-theme'); } catch (e) {}
 document.documentElement.dataset.theme = themePref === 'light' || themePref === 'dark' ? themePref
@@ -378,7 +379,7 @@ input[type="range"]:disabled{opacity:.5}
 .t-short{display:none}
 .status{display:flex;flex-direction:column;gap:7px;width:320px}
 .st-row{display:grid;grid-template-columns:8px auto minmax(0,1fr);align-items:baseline;column-gap:9px;font-size:12.5px;line-height:1.35;color:var(--ink-2)}
-.st-row .dot{align-self:center}
+.st-row .dot{align-self:start;margin-top:5px}
 .st-row strong{font-size:13.5px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .st-row > span:last-child{text-wrap:balance}
 .st-row[data-state="busy"] > span:last-child{opacity:.6}
@@ -570,8 +571,9 @@ const COMPONENTS = [
       { name:'Square',     ratio:'1:1',  w:1000, h:1000 },
       { name:'Widescreen', ratio:'16:9', w:1920, h:1080 } ]} ]},
   { id:'feature', code:'fcds', name:'Feature card', groups:[
-    { label:'Desktop', items:[{ name:'Default', ratio:'', w:1000, h:1147 }] },
-    { label:'Mobile',  items:[{ name:'Default', ratio:'', w:780,  h:1035 }] } ]},
+    { label:'', items:[
+      { name:'Desktop', ratio:'', w:1000, h:1147 },
+      { name:'Mobile',  ratio:'', w:780,  h:1035 } ]} ]},
   { id:'small', code:'scds', name:'Small card', groups:[
     { label:'', items:[
       { name:'Landscape', ratio:'3:2', w:1000, h:667 },
