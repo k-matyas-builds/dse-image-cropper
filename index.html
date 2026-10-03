@@ -48,6 +48,7 @@ document.documentElement.dataset.theme = themePref === 'light' || themePref === 
   --seg-on:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.1));
   --seg-on-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.3);
   --pill-bg:rgba(255,255,255,.1);
+  --solid-glass:rgba(34,36,41,.95);
   --pill-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.14);
   --thumb-ring:0 0 0 1px rgba(255,255,255,.1);
   --tile-ink:rgba(255,255,255,.92);
@@ -113,6 +114,7 @@ button:disabled{cursor:default}
   --seg-on:#fff;
   --seg-on-shadow:0 1px 3px rgba(0,0,0,.16),0 0 0 .5px rgba(0,0,0,.06);
   --pill-bg:rgba(255,255,255,.93);
+  --solid-glass:rgba(255,255,255,.97);
   --pill-shadow:inset 0 0 0 .5px rgba(0,0,0,.1),0 4px 14px -4px rgba(0,0,0,.35);
   --thumb-ring:0 0 0 .5px rgba(0,0,0,.14);
   --tile-ink:rgba(29,29,31,.72);
@@ -305,9 +307,33 @@ button:disabled{cursor:default}
 .tb-pop{position:absolute;right:-7px;bottom:calc(100% + 14px);z-index:6;width:330px;padding:14px;border-radius:20px;text-align:left;
   transform-origin:bottom right;animation:popIn .22s var(--ease)}
 @keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+/* Popover and dialog sit over busy imagery, so they use a nearly solid surface. */
+.tb-pop.glass,.td-card.glass{background:var(--solid-glass);-webkit-backdrop-filter:blur(40px) saturate(1.4);backdrop-filter:blur(40px) saturate(1.4)}
+.pop-btns{display:flex;gap:8px}
+.pop-btns .btn{flex:1}
+/* Popover rows with a switch */
+.pop-switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px;font-size:13px;font-weight:500;color:var(--ink)}
+.pop-switch-row .row-end{display:inline-flex;align-items:center;gap:8px}
+.pop-switch-row .btn{height:30px;padding:0 14px;font-size:12.5px}   /* as tall as the row, so showing it moves nothing */
+/* Custom copy editor: takes the side panel's place, so the frame stays visible while typing */
+.copy-sheet{position:absolute;top:var(--gap);right:var(--gap);bottom:var(--gap);z-index:7;width:var(--panel-w);display:flex;flex-direction:column;
+  padding:20px 18px 16px;border-radius:26px;animation:sheetIn .32s var(--ease)}
+@keyframes sheetIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.copy-sheet.glass{background:var(--solid-glass);-webkit-backdrop-filter:blur(40px) saturate(1.4);backdrop-filter:blur(40px) saturate(1.4)}
+.copy-sheet h2{margin:0 0 18px;font:600 17px var(--font-d);letter-spacing:-.01em;color:var(--ink)}
+.copy-sheet .sheet-note{margin:12px 0 0;font-size:12.5px;line-height:1.4;color:var(--ink-3)}
+.copy-sheet .field + .field{margin-top:14px}
+.copy-sheet textarea,.copy-sheet .input{display:block;width:100%;margin-top:6px;padding:9px 11px;border:0;border-radius:10px;outline:none;resize:vertical;
+  background:var(--field-bg);box-shadow:var(--field-shadow);font:400 14px/1.45 var(--font);color:var(--ink)}
+.copy-sheet .input{height:38px;padding:0 11px}
+.copy-sheet textarea:focus,.copy-sheet .input:focus{box-shadow:inset 0 0 0 1px rgba(75,151,255,.8),0 0 0 3px rgba(75,151,255,.25)}
+.copy-sheet textarea::placeholder,.copy-sheet .input::placeholder{color:var(--ink-3)}
+.sheet-actions{display:flex;gap:10px;margin-top:auto;padding-top:16px}
+.sheet-actions .btn{height:44px;padding:0 18px;font-size:14px}
+.sheet-actions .btn-primary{flex:1}
+@media (max-width:860px){.copy-sheet{top:auto;left:var(--gap);width:auto;max-height:60vh;overflow:auto}}
 .pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .pop-title{margin:0;font:600 13.5px var(--font);color:var(--ink)}
-.pop-cta{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
 .seg button:disabled{opacity:.35;cursor:default}
 .pop-row + .pop-row{margin-top:14px}
 .pop-label{display:block;margin-bottom:6px;font-size:11.5px;font-weight:600;color:var(--ink-3)}
@@ -490,17 +516,22 @@ input[type="range"]:disabled{opacity:.5}
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5L6 4.5l3 3"/></svg>
         </button>
         <div class="tb-pop glass" id="textPop" role="dialog" aria-label="Text preview options" hidden>
-          <div class="pop-head">
-            <p class="pop-title">Text preview</p>
-            <label class="pop-cta">CTA<span class="switch"><input type="checkbox" id="textCta" checked aria-label="Call to action"><span class="track"></span></span></label>
-          </div>
-          <div class="pop-row">
+          <div class="pop-head"><p class="pop-title">Text preview</p></div>
+          <div class="pop-row" id="textPlaceRow">
             <span class="pop-label">Placement</span>
             <div class="seg seg-fill" role="group" aria-label="Placement">
               <button type="button" data-place="top-left" aria-pressed="false">Top left</button>
               <button type="button" data-place="bottom-left" aria-pressed="false">Bottom left</button>
               <button type="button" data-place="centre-bottom" aria-pressed="false">Bottom centre</button>
             </div>
+          </div>
+          <label class="pop-row pop-switch-row" id="textCtaRow">CTA<span class="switch"><input type="checkbox" id="textCta" checked><span class="track"></span></span></label>
+          <div class="pop-row pop-switch-row">
+            <label for="copyOn">Custom copy</label>
+            <span class="row-end">
+              <button class="btn" id="copyEdit" type="button" hidden>Edit</button>
+              <label class="switch"><input type="checkbox" id="copyOn" aria-label="Custom copy"><span class="track"></span></label>
+            </span>
           </div>
         </div>
       </div>
@@ -536,6 +567,18 @@ input[type="range"]:disabled{opacity:.5}
       <button class="btn-primary" id="reviewBtn" type="button" disabled>Review and download</button>
     </footer>
   </aside>
+
+  <section class="copy-sheet glass" id="copySheet" role="dialog" aria-labelledby="csTitle" hidden>
+    <h2 id="csTitle">Custom copy</h2>
+    <label class="field">Headline<textarea id="csHead" rows="2" maxlength="120" placeholder="Lorem ipsum dolor sit amet"></textarea></label>
+    <label class="field">Body<textarea id="csBody" rows="4" maxlength="300" placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit."></textarea></label>
+    <label class="field">CTA<input class="input" id="csCta" maxlength="40" placeholder="Label" autocomplete="off"></label>
+    <p class="sheet-note">Custom copy is remembered for 30 minutes, then goes back to the default.</p>
+    <div class="sheet-actions">
+      <button class="btn" id="csCancel" type="button">Cancel</button>
+      <button class="btn-primary" id="csDone" type="button">Done</button>
+    </div>
+  </section>
 </div>
 
 <div class="review" id="review" role="dialog" aria-modal="true" aria-labelledby="rvTitle" hidden>
@@ -650,15 +693,16 @@ for (const c of COMPONENTS) (c.groups || []).forEach((g, gi) => g.items.forEach(
 /* ---------- Text preview data ----------
    d is the desktop layout, m the mobile one, in pixels of the layout width wc.
    Banner is fitted to the production preview templates (1920 x 840 and 780 x 1040, in image pixels).
-   Billboard and Large card are measured from the live page at 1920 px and on a 390 px phone, in CSS px.
+   Billboard (Hero banner) uses the same sizes, with the live page's narrower centred text column.
+   Large card is measured from the live page at 1920 px and on a 390 px phone, in CSS px.
    Feature card is a Large card in a carousel: measured at a 577 px card (about a 1550 px window) and on a phone.
-   Its placement and CTA are fixed, as on the live page. Baselines are corrected for Ford Antenna, which sits
+   fixed: options a component doesn't offer. Feature card has fixed placement and CTA, Hero banner fixed placement. Baselines are corrected for Ford Antenna, which sits
    about 0.11 em higher in its line than the fallback font the live layouts were measured with.
    pad: margins [top, right, bottom with CTA, left]; padBn: bottom margin without CTA; col: text column width.
    h and b: headline and body type (fs size, lh line height, fw weight, ls letter spacing,
    x extra box height, bl first baseline from the top of its box).
    cta: button w (0 sizes it to the label within minW..maxW), h, gap above, tail below, and label type. */
-const TEXT_SPECS = {"billboard":{"cta":"primary","w":{"d":{"wc":1910,"pad":[64,247,64,247],"padBn":64,"col":936,"h":{"fs":46,"lh":56,"fw":600,"ls":-0.48,"x":8,"bl":38.8},"b":{"fs":16,"lh":24,"fw":600,"ls":0.19,"x":8,"bl":15.2},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":380,"pad":[24,24,24,24],"padBn":24,"col":332,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.48,"x":8,"bl":27.6},"b":{"fs":14,"lh":24,"fw":600,"ls":0.16,"x":8,"bl":15.4},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"large":{"cta":"secondary","w":{"d":{"wc":1416,"pad":[64,64,64,64],"padBn":64,"col":936,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":21,"bl":40.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.2},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":332,"pad":[24,24,24,24],"padBn":24,"col":284,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.4},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"banner":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":1416,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":676,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}}},"feature":{"cta":"secondary","fixed":{"place":"bottom-left","cta":true},"w":{"d":{"wc":577,"pad":[64,64,64,64],"padBn":64,"col":449,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":8,"bl":27.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":342,"pad":[24,24,24,24],"padBn":24,"col":294,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}}};
+const TEXT_SPECS = {"billboard":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":941,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":681,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}},"fixed":{"place":"centre-bottom"}},"large":{"cta":"secondary","w":{"d":{"wc":1416,"pad":[64,64,64,64],"padBn":64,"col":936,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":21,"bl":40.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.2},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":332,"pad":[24,24,24,24],"padBn":24,"col":284,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.4},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}},"banner":{"cta":"primary","w":{"d":{"wc":1920,"pad":[54,252,61,252],"padBn":56,"col":1416,"h":{"fs":48,"lh":56,"fw":600,"ls":-0.6,"x":8,"bl":44.8},"b":{"fs":20,"lh":24,"fw":400,"ls":0.24,"x":0,"bl":19},"cta":{"w":168,"h":34,"gap":23,"tail":0,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":780,"pad":[36,52,49,52],"padBn":36,"col":676,"h":{"fs":64,"lh":80,"fw":600,"ls":-0.96,"x":13,"bl":62.4},"b":{"fs":32,"lh":48,"fw":400,"ls":0.38,"x":0,"bl":35.2},"cta":{"w":336,"h":72,"gap":32,"tail":0,"fs":28,"fw":600,"ls":0.32}}}},"feature":{"cta":"secondary","fixed":{"place":"bottom-left","cta":true},"w":{"d":{"wc":577,"pad":[64,64,64,64],"padBn":64,"col":449,"h":{"fs":32,"lh":40,"fw":600,"ls":-0.38,"x":8,"bl":27.6},"b":{"fs":16,"lh":24,"fw":400,"ls":0.19,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}},"m":{"wc":342,"pad":[24,24,24,24],"padBn":24,"col":294,"h":{"fs":24,"lh":32,"fw":600,"ls":-0.28,"x":8,"bl":21.2},"b":{"fs":14,"lh":24,"fw":400,"ls":0.16,"x":8,"bl":15.3},"cta":{"w":0,"minW":120,"maxW":260,"padX":26,"h":40,"gap":16,"tail":7,"fs":14,"fw":600,"ls":0.16}}}}};
 // Stand-in copy and line breaks, as in the production preview templates.
 const TEXT_COPY = {
   d:{ head:['Lorem ipsum dolor sit amet'],
@@ -695,6 +739,8 @@ const els = {
   stWeight:$('stWeight'), stWeightVal:$('stWeightVal'), stWeightMsg:$('stWeightMsg'), stQuality:$('stQuality'), stQualityMsg:$('stQualityMsg'), downloadBtn:$('downloadBtn'),
   toast:$('toast'), toastText:$('toastText'), toastClose:$('toastClose'),
   textSep:$('textSep'), textCtl:$('textCtl'), textToggle:$('textToggle'), textMenuBtn:$('textMenuBtn'), textPop:$('textPop'), textCta:$('textCta'),
+  textPlaceRow:$('textPlaceRow'), textCtaRow:$('textCtaRow'), copyOn:$('copyOn'), copyEdit:$('copyEdit'),
+  copySheet:$('copySheet'), csHead:$('csHead'), csBody:$('csBody'), csCta:$('csCta'), csCancel:$('csCancel'), csDone:$('csDone'),
   cw:null, ch:null, customErr:null
 };
 const ctx = els.canvas.getContext('2d');
@@ -713,7 +759,7 @@ const S = {
   auto:null,          // { blob, q, fits }: highest quality that fits the DSE limit
   manualQ:null,       // quality picked on the review slider, or null for the automatic fit
   result:null, stale:false, gen:0, compressTimer:0, hinted:false,
-  text:{ on:false, cta:true, seenPop:false, place:{ billboard:'centre-bottom', banner:'bottom-left', large:'bottom-left', feature:'bottom-left' } },
+  text:{ on:false, cta:true, seenPop:false, custom:null, useCustom:false, draft:null, place:{ billboard:'centre-bottom', banner:'bottom-left', large:'bottom-left', feature:'bottom-left' } },
   reviewOpen:false, rvMode:'fit'
 };
 const view = { W:0, H:0, dpr:1, p:0 };  // p: how far the panel has slid in, 0 to 1
@@ -1197,13 +1243,14 @@ els.resetBtn.addEventListener('click', resetFraming);
 function textLayout(){
   const t = target();
   if (!S.text.on || !S.img || !t || !t.text) return null;
-  const spec = TEXT_SPECS[t.text], fixed = spec.fixed;
+  const spec = TEXT_SPECS[t.text], fixed = spec.fixed || {};
   return { t, sp:spec.w[t.screen === 'mobile' ? 'm' : 'd'], ctaStyle:spec.cta,
-    place:fixed ? fixed.place : textPlace(t), showCta:fixed ? fixed.cta : S.text.cta };
+    place:textPlace(t), showCta:'cta' in fixed ? fixed.cta : S.text.cta };
 }
 // On mobile the live page puts bottom-centre text bottom left, so the preview does too.
 function textPlace(t){
-  const place = S.text.place[t.text];
+  const fixed = TEXT_SPECS[t.text].fixed || {};
+  const place = fixed.place || S.text.place[t.text];
   return t.screen === 'mobile' && place === 'centre-bottom' ? 'bottom-left' : place;
 }
 // 1 if Ford Antenna is installed, otherwise how much wider Antenna is than the fallback font at this weight.
@@ -1227,13 +1274,14 @@ function setFont(f, px){
   ctx.font = `${f.fw} ${px}px ${TEXT_FONT}`;
   if ('letterSpacing' in ctx) ctx.letterSpacing = `${f.ls * px / f.fs}px`;
 }
-// The template line breaks are the reference, so a line only breaks further if it overshoots the column by 5%.
-function wrapLines(text, f, maxW, st){
+// Template line breaks are the reference, so those lines only break further if they overshoot the column by 5%.
+// Custom text wraps at the column, as the live page would.
+function wrapLines(text, f, maxW, st, tol = 1.05){
   setFont(f, f.fs);
   const lines = []; let cur = '';
   for (const word of text.split(' ')) {
     const test = cur ? cur + ' ' + word : word;
-    if (cur && ctx.measureText(test).width * st > maxW * 1.05) { lines.push(cur); cur = word; } else cur = test;
+    if (cur && ctx.measureText(test).width * st > maxW * tol) { lines.push(cur); cur = word; } else cur = test;
   }
   if (cur) lines.push(cur);
   return lines.map(line => ({ line, w:ctx.measureText(line).width * st }));
@@ -1254,9 +1302,15 @@ function drawTextPreview(F, alpha){
   ctx.beginPath(); ctx.rect(F.x, F.y, F.w, F.h); ctx.clip();
   ctx.globalAlpha = alpha;
   // Keep the template's line breaks, and only break further if a line doesn't fit the column.
-  const head = copy.head.flatMap(l => wrapLines(l, sp.h, sp.col, stH));
-  const body = copy.body.flatMap(l => wrapLines(l, sp.b, sp.col, stB));
-  const headH = head.length * sp.h.lh + sp.h.x, bodyH = body.length * sp.b.lh + sp.b.x;
+  const own = activeCopy();
+  // Your own lines wrap at the column; template lines keep their breaks with 5% leeway.
+  const lines = (val, fallback, f, st) => val
+    ? val.split('\n').map(l => l.trim()).filter(Boolean).flatMap(l => wrapLines(l, f, sp.col, st, 1))
+    : fallback.flatMap(l => wrapLines(l, f, sp.col, st));
+  const head = lines(own && own.head.trim(), copy.head, sp.h, stH);
+  const body = lines(own && own.body.trim(), copy.body, sp.b, stB);
+  const ctaLabel = own && own.cta.trim() ? own.cta.trim() : TEXT_COPY.cta;
+  const headH = head.length ? head.length * sp.h.lh + sp.h.x : 0, bodyH = body.length ? body.length * sp.b.lh + sp.b.x : 0;
   const wrapH = sp.pad[0] + headH + bodyH + (L.showCta ? c.gap + c.h + c.tail + sp.pad[2] : sp.padBn);
   const wy = bottom ? Hc - wrapH : 0;
   const colX = centre ? (sp.wc - sp.col) / 2 : sp.pad[3];
@@ -1278,14 +1332,16 @@ function drawTextPreview(F, alpha){
   if (L.showCta) {
     y += c.gap;
     setFont(c, c.fs);
-    const bw = c.w || clamp(ctx.measureText(TEXT_COPY.cta).width * stC + c.padX * 2, c.minW, c.maxW);
+    const labelW = ctx.measureText(ctaLabel).width * stC;
+    // Fixed-width template buttons still grow to fit a longer custom label.
+    const bw = c.w ? Math.max(c.w, labelW + c.fs * 3.7) : clamp(labelW + c.padX * 2, c.minW, c.maxW);
     const bx = centre ? colX + (sp.col - bw) / 2 : colX;
     ctx.beginPath();
     if (L.ctaStyle === 'primary') { ctx.roundRect(X(bx), Y(y), bw * k, c.h * k, c.h / 2 * k); ctx.fillStyle = '#1700F4'; ctx.fill(); }
     else { ctx.roundRect(X(bx + 1), Y(y + 1), (bw - 2) * k, (c.h - 2) * k, c.h / 2 * k); ctx.lineWidth = 2 * k; ctx.strokeStyle = '#fff'; ctx.stroke(); }
     ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
     setFont(c, c.fs * k);
-    stretchedText(TEXT_COPY.cta, X(bx + bw / 2), Y(y + c.h / 2), stC, 'center');
+    stretchedText(ctaLabel, X(bx + bw / 2), Y(y + c.h / 2), stC, 'center');
   }
   ctx.restore();
 }
@@ -1298,10 +1354,13 @@ function syncTextUI(){
   if (!ok) closeTextPop();
   els.textToggle.setAttribute('aria-pressed', String(ok && S.text.on));
   els.textCtl.classList.toggle('on', ok && S.text.on);
-  const fixed = ok && !!TEXT_SPECS[t.text].fixed;
-  els.textMenuBtn.hidden = !(ok && S.text.on) || fixed;
-  if (fixed) closeTextPop();
+  const fixed = (ok && TEXT_SPECS[t.text].fixed) || {};
+  els.textMenuBtn.hidden = !(ok && S.text.on);
   if (!ok) return;
+  els.textPlaceRow.hidden = 'place' in fixed;
+  els.textCtaRow.hidden = 'cta' in fixed;
+  els.copyOn.checked = S.text.useCustom || !!S.text.draft;          // on while the editor is open
+  els.copyEdit.hidden = !S.text.useCustom || !!S.text.draft;
   const place = textPlace(t), mobile = t.screen === 'mobile';
   els.textPop.querySelectorAll('[data-place]').forEach(b => {
     const centre = b.dataset.place === 'centre-bottom';
@@ -1316,8 +1375,8 @@ function textChanged(){ syncTextUI(); updateCropInfo(); requestDraw(); }
 els.textToggle.addEventListener('click', () => {
   S.text.on = !S.text.on;
   const t = target();
-  if (S.text.on && !S.text.seenPop && t && !TEXT_SPECS[t.text].fixed) { S.text.seenPop = true; openTextPop(); }   // show the options the first time
-  if (!S.text.on) closeTextPop();
+  if (S.text.on && !S.text.seenPop && t) { S.text.seenPop = true; openTextPop(); }   // show the options the first time
+  if (!S.text.on) { closeTextPop(); closeCopySheet(false); }
   textChanged();
 });
 els.textMenuBtn.addEventListener('click', () => {
@@ -1329,6 +1388,90 @@ els.textPop.querySelectorAll('[data-place]').forEach(b => b.addEventListener('cl
   S.text.place[t.text] = b.dataset.place; textChanged();
 }));
 els.textCta.addEventListener('change', () => { S.text.cta = els.textCta.checked; textChanged(); });
+
+/* Custom copy: saved in this browser so it carries over to other images, and cleared 30 minutes after the last edit. */
+const COPY_KEY = 'dse-cropper-copy';
+const COPY_TTL = 30 * 60 * 1000;
+function loadCustomCopy(){
+  try {
+    const v = JSON.parse(localStorage.getItem(COPY_KEY));
+    if (v && (v.head || v.body || v.cta) && Date.now() - (v.at || 0) < COPY_TTL) return v;
+    localStorage.removeItem(COPY_KEY);
+  } catch {}
+  return null;
+}
+function storeCustomCopy(){
+  try {
+    if (S.text.custom) localStorage.setItem(COPY_KEY, JSON.stringify({ ...S.text.custom, on:S.text.useCustom }));
+    else localStorage.removeItem(COPY_KEY);
+  } catch {}
+}
+// Called when a new image loads: drop copy that has passed its 30 minutes.
+function expireCustomCopy(){
+  if (S.text.custom && Date.now() - S.text.custom.at >= COPY_TTL) {
+    S.text.custom = null; S.text.useCustom = false; storeCustomCopy();
+    toast('Custom copy cleared after 30 minutes');
+  }
+}
+function activeCopy(){
+  if (S.text.draft) return S.text.draft;
+  return S.text.useCustom ? S.text.custom : null;
+}
+{ const v = loadCustomCopy(); S.text.custom = v && { head:v.head || '', body:v.body || '', cta:v.cta || '', at:v.at }; S.text.useCustom = !!(v && v.on); }
+
+let sheetWasOn = false;
+function openCopySheet(){
+  const own = S.text.custom || { head:'', body:'', cta:'' };
+  sheetWasOn = S.text.useCustom && !!S.text.custom;
+  els.csHead.value = own.head; els.csBody.value = own.body; els.csCta.value = own.cta;
+  S.text.draft = { head:own.head, body:own.body, cta:own.cta };
+  S.text.on = true;
+  closeTextPop();
+  els.copySheet.hidden = false;
+  els.csHead.focus();
+  textChanged();
+}
+function closeCopySheet(commit){
+  if (els.copySheet.hidden) return;
+  if (commit) {
+    const v = { head:els.csHead.value.trim(), body:els.csBody.value.trim(), cta:els.csCta.value.trim() };
+    if (v.head || v.body || v.cta) { S.text.custom = { ...v, at:Date.now() }; S.text.useCustom = true; }
+    else { S.text.custom = null; S.text.useCustom = false; }          // nothing entered: back to the placeholder
+  } else S.text.useCustom = sheetWasOn;                              // cancel puts the switch back as it was
+  storeCustomCopy();
+  S.text.draft = null;
+  els.copySheet.hidden = true;
+  textChanged();
+  if (!els.textMenuBtn.hidden) els.textMenuBtn.focus();
+}
+const updateDraft = () => {
+  S.text.draft = { head:els.csHead.value, body:els.csBody.value, cta:els.csCta.value };
+  requestDraw();
+};
+[els.csHead, els.csBody, els.csCta].forEach(e => e.addEventListener('input', updateDraft));
+els.copyOn.addEventListener('change', () => {
+  if (els.copyOn.checked) {
+    if (S.text.custom) { S.text.useCustom = true; storeCustomCopy(); textChanged(); }
+    else { S.text.useCustom = true; openCopySheet(); }               // first time: write it
+  } else {
+    closeCopySheet(false);                                           // switching off closes the editor too
+    S.text.useCustom = false; storeCustomCopy(); textChanged();
+  }
+});
+els.copyEdit.addEventListener('click', openCopySheet);
+els.csCancel.addEventListener('click', () => closeCopySheet(false));
+els.csDone.addEventListener('click', () => closeCopySheet(true));
+els.copySheet.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeCopySheet(false); }
+  else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); closeCopySheet(true); }
+  else if (e.key === 'Tab') {
+    const f = [els.csHead, els.csBody, els.csCta, els.csCancel, els.csDone], i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  }
+});
+
+// Clicking anywhere outside the text controls, or pressing Esc, closes the options popover.
 document.addEventListener('pointerdown', e => { if (!els.textPop.hidden && !els.textCtl.contains(e.target)) closeTextPop(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !els.textPop.hidden && !S.reviewOpen) { closeTextPop(); els.textMenuBtn.focus(); }
@@ -1675,6 +1818,7 @@ async function loadBlob(blob, name){
     return false;
   }
   hideToast();
+  expireCustomCopy();
   if (S.imgUrl) URL.revokeObjectURL(S.imgUrl);
   resetResult(); clearTimeout(S.compressTimer);
   const first = !S.img;
@@ -1696,6 +1840,7 @@ async function loadBlob(blob, name){
 }
 
 function closeImage(){
+  closeCopySheet(false);
   closeReview();
   if (S.imgUrl) URL.revokeObjectURL(S.imgUrl);
   resetResult(); clearTimeout(S.compressTimer);
