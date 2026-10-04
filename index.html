@@ -294,6 +294,7 @@ button:disabled{cursor:default}
 .tb-btn:hover:not(:disabled){background:var(--hover-2)}
 .tb-btn:disabled{opacity:.35}
 .tb-btn[aria-pressed="true"]{background:var(--accent-soft);box-shadow:var(--accent-ring)}
+#actualBtn[data-mode="actual"] .ic-fill,#actualBtn[data-mode="fill"] .ic-actual{display:none}
 
 /* Text preview: split button with an options popover */
 .tb-split{position:relative;display:inline-flex;align-items:center;border-radius:999px;transition:background .15s,box-shadow .15s}
@@ -498,9 +499,14 @@ input[type="range"]:disabled{opacity:.5}
       </button>
       <output id="zoomVal">100%</output>
       <span class="tb-sep" aria-hidden="true"></span>
-      <button class="tb-btn" id="gridToggle" type="button" aria-pressed="true" title="Rule-of-thirds grid">
+      <button class="tb-btn" id="gridToggle" type="button" aria-pressed="false" title="Rule-of-thirds grid">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1.75" y="1.75" width="12.5" height="12.5" rx="2.5"/><path d="M6 2v12M10 2v12M2 6h12M2 10h12"/></svg>
         <span class="tb-text">Grid</span>
+      </button>
+      <button class="tb-btn" id="actualBtn" type="button" data-mode="actual">
+        <svg class="ic-actual" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6V2.5H6M13.5 6V2.5H10M2.5 10v3.5H6M13.5 10v3.5H10"/><rect x="5.5" y="5.5" width="5" height="5" rx="1"/></svg>
+        <svg class="ic-fill" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5L9 7M6.5 13.5h-4v-4M2.5 13.5L7 9"/></svg>
+        <span class="tb-text" id="actualText">Actual size</span>
       </button>
       <button class="tb-btn" id="resetBtn" type="button" title="Reset framing. Shortcut: 0">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.75 8a5.25 5.25 0 1 0 1.6-3.78"/><path d="M2.5 2.25v3.25h3.25"/></svg>
@@ -644,12 +650,14 @@ const UPSCALE_SOFT_PCT = 150; // upscaling: amber up to this, red above
 const MAX_ZOOM = 8;           // relative to the smallest zoom that fills the frame
 const QUALITY_SETTLE_MS = 500; // wait after the quality slider stops before re-encoding
 
+// actual: how wide each component appears, in CSS px, on a 1550 px desktop window (d) and a 390 px phone (m).
+// Small and Column card are half the content width; Feature card was measured at this window size.
 const COMPONENTS = [
-  { id:'hero', code:'bbds', text:'billboard', name:'Hero banner', groups:[
+  { id:'hero', actual:{ d:1550, m:390 }, code:'bbds', text:'billboard', name:'Hero banner', groups:[
     { label:'', items:[
       { name:'Desktop', ratio:'16:9', w:1920, h:1080 },
       { name:'Mobile',  ratio:'9:16', w:780,  h:1385 } ]} ]},
-  { id:'banner', code:'bbds', text:'banner', name:'Banner', groups:[
+  { id:'banner', actual:{ d:1550, m:390 }, code:'bbds', text:'banner', name:'Banner', groups:[
     { label:'Desktop', items:[
       { name:'Default', ratio:'16:9', w:1920, h:1080 },
       { name:'Short',   ratio:'16:7', w:1920, h:840 },
@@ -658,7 +666,7 @@ const COMPONENTS = [
       { name:'Default', ratio:'9:16', w:780,  h:1385 },
       { name:'Short',   ratio:'3:4',  w:780,  h:1040 },
       { name:'Square',  ratio:'1:1',  w:1000, h:1000 } ]} ]},
-  { id:'large', code:'lcds', text:'large', name:'Large card', groups:[
+  { id:'large', actual:{ d:1190, m:342 }, code:'lcds', text:'large', name:'Large card', groups:[
     { label:'Desktop', items:[
       { name:'Default', ratio:'16:9', w:1920, h:1080 },
       { name:'Short',   ratio:'16:7', w:1920, h:840 } ]},
@@ -667,15 +675,15 @@ const COMPONENTS = [
       { name:'Short',      ratio:'3:4',  w:780,  h:1040 },
       { name:'Square',     ratio:'1:1',  w:1000, h:1000 },
       { name:'Widescreen', ratio:'16:9', w:1920, h:1080 } ]} ]},
-  { id:'feature', code:'fcds', text:'feature', name:'Feature card', groups:[
+  { id:'feature', actual:{ d:577, m:342 }, code:'fcds', text:'feature', name:'Feature card', groups:[
     { label:'', items:[
       { name:'Desktop', ratio:'', w:1000, h:1147 },
       { name:'Mobile',  ratio:'', w:780,  h:1035 } ]} ]},
-  { id:'small', code:'scds', name:'Small card', groups:[
+  { id:'small', actual:{ d:583, m:342 }, code:'scds', name:'Small card', groups:[
     { label:'', items:[
       { name:'Landscape', ratio:'3:2', w:1000, h:667 },
       { name:'Square',    ratio:'1:1', w:1000, h:1000 } ]} ]},
-  { id:'column', code:'ccds', name:'Column card', groups:[
+  { id:'column', actual:{ d:583, m:342 }, code:'ccds', name:'Column card', groups:[
     { label:'', items:[
       { name:'Landscape', ratio:'3:2', w:1000, h:667 } ]} ]},
   { id:'custom', name:'Custom size', custom:true }
@@ -686,6 +694,7 @@ for (const c of COMPONENTS) (c.groups || []).forEach((g, gi) => g.items.forEach(
   it.id = `${c.id}-${gi}-${i}`;
   it.comp = c.id; it.code = c.code; it.text = c.text;
   it.screen = g.label === 'Mobile' || it.name === 'Mobile' ? 'mobile' : 'desktop';
+  it.actual = c.actual ? c.actual[it.screen === 'mobile' ? 'm' : 'd'] : 0;
   it.label = `${c.name}, ${[g.label, it.name].filter(Boolean).join(' ').toLowerCase()}`;
   PRESETS[it.id] = it;
 }));
@@ -729,7 +738,7 @@ const $ = id => document.getElementById(id);
 const els = {
   app:$('app'), stage:$('stage'), canvas:$('view'), frameLabel:$('frameLabel'), prompt:$('prompt'), promptText:$('promptText'),
   welcome:$('welcome'), pickBtn:$('pickBtn'), fileInput:$('fileInput'),
-  toolbar:$('toolbar'), zoom:$('zoom'), zoomIn:$('zoomIn'), zoomOut:$('zoomOut'), zoomVal:$('zoomVal'), gridToggle:$('gridToggle'), resetBtn:$('resetBtn'),
+  toolbar:$('toolbar'), zoom:$('zoom'), zoomIn:$('zoomIn'), zoomOut:$('zoomOut'), zoomVal:$('zoomVal'), gridToggle:$('gridToggle'), actualBtn:$('actualBtn'), actualText:$('actualText'), resetBtn:$('resetBtn'),
   panel:$('panel'), srcThumb:$('srcThumb'), srcName:$('srcName'), srcMeta:$('srcMeta'), replaceBtn:$('replaceBtn'), clearBtn:$('clearBtn'),
   comps:$('comps'), upNote:$('upNote'), panelFoot:$('panelFoot'), reviewBtn:$('reviewBtn'),
   review:$('review'), rvTitle:$('rvTitle'), rvDims:$('rvDims'), rvFit:$('rvFit'), rvActual:$('rvActual'), rvCompare:$('rvCompare'), rvBack:$('rvBack'),
@@ -754,7 +763,7 @@ const S = {
   sel:null,           // chosen size: a preset id, 'custom', or null
   custom:null,        // { w, h } once valid custom values are entered
   crops:{}, lastCenter:null,
-  grid:true, interacting:false,
+  grid:false, actual:true, interacting:false,      // actual: show cards at their real on-screen size by default
   outCanvas:null,     // the uncompressed crop at output size
   auto:null,          // { blob, q, fits }: highest quality that fits the DSE limit
   manualQ:null,       // quality picked on the review slider, or null for the automatic fit
@@ -842,11 +851,34 @@ function area(){
   const { W, H } = view; const pad = W < 640 ? 12 : 32; const ins = panelInset();
   return { x:pad, y:pad + LABEL_SPACE, w:Math.max(40, W - ins.r - pad * 2), h:Math.max(40, H - ins.b - pad * 2 - LABEL_SPACE - TOOLBAR_SPACE) };
 }
-function frameRect(){
+function fitFrame(){
   const A = area(); const a = aspect();
   let fw = A.w, fh = fw / a;
   if (fh > A.h) { fh = A.h; fw = fh * a; }
+  return { A, a, fw, fh };
+}
+// The real on-screen width, when Actual size is on and that's smaller than the stage allows.
+function actualWidth(){
+  const t = target();
+  if (!t || !t.actual) return 0;
+  return t.actual < fitFrame().fw ? t.actual : 0;
+}
+function frameRect(){
+  let { A, a, fw, fh } = fitFrame();
+  const real = S.actual ? actualWidth() : 0;
+  if (real) { fw = real; fh = fw / a; }
   return { x:A.x + (A.w - fw) / 2, y:A.y + (A.h - fh) / 2, w:fw, h:fh };
+}
+// The button names what it will do: Fill screen while at actual size, Actual size otherwise.
+function syncActual(){
+  const avail = framed() && actualWidth() > 0, atActual = S.actual && avail;
+  els.actualBtn.disabled = !avail;
+  els.actualBtn.dataset.mode = atActual ? 'fill' : 'actual';
+  els.actualText.textContent = atActual ? 'Fill screen' : 'Actual size';
+  els.actualBtn.title = !framed() || !target().actual ? 'No typical on-screen size for this format'
+    : atActual ? 'Enlarge the frame to fill the screen'
+    : avail ? `Show at the size it appears on a typical screen (${target().actual} px wide)`
+    : 'Already shown smaller than it appears on screen';
 }
 // Where the image, the frame and the dimming sit right now.
 function geometry(){
@@ -978,6 +1010,7 @@ function syncEnabled(){
   els.toolbar.inert = !on;
   els.panelFoot.classList.toggle('off', !on);
   [els.zoom, els.resetBtn, els.gridToggle].forEach(e => { e.disabled = !on; });
+  syncActual();
   els.reviewBtn.disabled = !on;
   els.stage.classList.toggle('framed', on);
   els.stage.tabIndex = on ? 0 : -1;
@@ -990,6 +1023,7 @@ function updateCropInfo(){
   if (!framed()) { els.upNote.hidden = true; els.frameLabel.innerHTML = ''; return; }
   const r = cropRect(getCrop());
   let label = `<span class="fl-name">${esc(t.label)}</span><span>${t.w} ${X} ${t.h}</span>` + (t.ratio ? `<span>${esc(t.ratio)}</span>` : '');
+  if (S.actual && actualWidth()) label += `<span>Actual size</span>`;
   if (r.w < t.w * 0.995) {
     const up = Math.round(t.w / r.w * 100);
     label += `<span class="fl-warn">Upscaled ${up}%</span>`;
@@ -1238,6 +1272,10 @@ function resetFraming(){
   changed();
 }
 els.resetBtn.addEventListener('click', resetFraming);
+els.actualBtn.addEventListener('click', () => {
+  S.actual = !S.actual;
+  startGeoAnim(); syncActual(); updateCropInfo(); requestDraw();
+});
 
 /* ---------- Text preview ---------- */
 function textLayout(){
@@ -1884,6 +1922,7 @@ new ResizeObserver(() => {
   els.canvas.width = Math.round(b.width * view.dpr);
   els.canvas.height = Math.round(b.height * view.dpr);
   draw();
+  if (framed()) { syncActual(); updateCropInfo(); }
 }).observe(els.stage);
 window.addEventListener('resize', () => { if (S.reviewOpen && S.rvMode === 'fit') sizeStack(); });
 mqMobile.addEventListener('change', requestDraw);
